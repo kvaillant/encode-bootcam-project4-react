@@ -1,8 +1,11 @@
 import Cors from "cors";
+import { container } from "tsyringe";
+import { ITokenizedBallotService } from "../../../services/ITokenizedBallotService";
+import { TokenizedBallotService } from "../../../services/TokenizedBallotService";
 
 // Initializing the cors middleware
 const cors = Cors({
-  methods: ["POST", "HEAD"]
+  methods: ["POST", "HEAD"],
 });
 
 // Helper method to wait for a middleware to execute before continuing
@@ -25,23 +28,19 @@ async function handler(req, res) {
 
   //check the expected methog
   if (req.method === "POST") {
-
-    const {var1, var2} = req.body;
-
-    //do something
-
-    return res.status(200).json({
-         //json attributes
-      });
+    const instance = container.resolve(
+      TokenizedBallotService
+    ) as ITokenizedBallotService;
+    return res.status(201).json(await instance.claimTokens(req.body));
   }
 
   return res.status(404).json({
     error: {
       code: "not_found",
-      message: "The requested endpoint was not found or doesn't support this method."
-    }
+      message:
+        "The requested endpoint was not found or doesn't support this method.",
+    },
   });
-
 }
 
 export default handler;
